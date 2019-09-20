@@ -1,0 +1,110 @@
+* DEMO.BP CRUD.RTNE
+* WRAPPER FOR DEMO ROUTINE TO WORK WITH WDB.RESOURCE
+******
+*
+WERR = "" ; BODY = "" ; RERR = ""
+OPEN "WDB.RESOURCE" TO F.WORK ELSE WERR = "CANNOT OPEN FILE"
+*
+CALL WGETHEADER(REQUESTMETHOD,"REQUEST_METHOD")
+CALL WGETPARAM(WID,"1")
+IF REQUESTMETHOD = "" THEN REQUESTMETHOD = "VIEW"
+*
+BEGIN CASE
+   CASE REQUESTMETHOD EQ "GET"
+      IF WID NE "" THEN
+         READ WREC FROM F.WORK,"API*":WID THEN
+            WIDS = \{\
+            WIDS = WIDS: \ "id" : "\:WID:\",\
+            WIDS = WIDS: \ "A1" : "\:WREC<1>:\",\
+            WIDS = WIDS: \ "A2" : "\:WREC<2>:\",\
+            WIDS = WIDS: \ "A3" : "\:WREC<3>:\",\
+            WIDS = WIDS: \ "A4" : "\:WREC<4>:\",\
+            WIDS = WIDS: \ "A5" : "\:WREC<5>:\",\
+            WIDS = WIDS: \ "A6" : "\:WREC<6>:\",\
+            WIDS = WIDS: \ "A7" : "\:WREC<7>:\"}\
+         END
+      END ELSE
+         WIDS = ""
+         SELECT F.WORK
+         JSONOBJ = ""; OBJ = ""
+         EOF = 0
+         LOOP         
+            READNEXT WID ELSE EOF = 1
+         UNTIL EOF DO            
+            IF WID[1,3] = "API" THEN             
+               WIDS<-1> = \{"id":"\:FIELD(WID,"*",2):\"}\
+            END
+         REPEAT
+         WIDS = CHANGE(WIDS,@AM,\,\)
+      END
+      BODY = \ [\: WIDS :\] \
+
+   CASE REQUESTMETHOD EQ "POST"
+      *WERR = "POST or Create Method"
+      CALL WGETBODY(BODY)
+      CALL WOBJ(OBJ,"FROMSTRING","",BODY,"",RERR)
+      CALL WOBJ(OBJ,"GET","id",WID,"",RERR)
+      CALL WOBJ(OBJ,"GET","desc",DESC,"",RERR)
+      CALL WOBJ(OBJ,"GET","program",PGM,"",RERR)
+      CALL WOBJ(OBJ,"GET","debug",DEBUG,"",RERR)
+      READ WREC FROM F.WORK,"API*":WID THEN
+         WERR = "Cannot create ":WID:", it already exists"
+      END ELSE
+         WREC = ""
+         WREC<1> = "P"
+         WREC<2> = DESC
+         WREC<3> = PGM
+         WREC<4> = ""
+         WREC<5> = 1
+         WREC<6> = 1
+         WREC<7> = DEBUG
+         WRITE WREC ON F.WORK,"API*":WID
+         SUCCESS = WID:" has been added to WDB.RESOURCE"
+         BODY = SUCCESS
+      END
+
+   CASE REQUESTMETHOD EQ "PUT"
+      *WERR = "PUT or Update Method"
+      CALL WGETBODY(BODY)
+      CALL WOBJ(OBJ,"FROMSTRING","",BODY,"",RERR)
+      CALL WOBJ(OBJ,"GET","id",WID,"",RERR)
+      CALL WOBJ(OBJ,"GET","desc",DESC,"",RERR)
+      CALL WOBJ(OBJ,"GET","program",PGM,"",RERR)
+      CALL WOBJ(OBJ,"GET","debug",DEBUG,"",RERR)
+      READ WREC FROM F.WORK,"API*":WID THEN
+         WREC<2> = DESC
+         WREC<3> = PGM
+         WREC<7> = DEBUG
+         WRITE WREC ON F.WORK,"API*":WID
+         SUCCESS = WID:" has been updated!" 
+         BODY = SUCCESS
+      END ELSE
+         WERR = WID:" does not exist"
+      END
+
+   CASE REQUESTMETHOD EQ "DELETE"
+      *WERR = "DELETE Method"
+      CALL WGETBODY(BODY)
+      CALL WOBJ(OBJ,"FROMSTRING","",BODY,"",RERR)
+      CALL WOBJ(OBJ,"GET","id",WID,"",RERR)
+      DELETE F.WORK,"API*":WID
+      SUCCESS = WID:" has been DELETED"
+      BODY = SUCCESS
+
+   CASE 1
+      WERR = "Error in your call"
+
+END CASE
+*
+IF WERR NE "" OR RERR NE "" THEN
+   IF RERR NE "" THEN WERR = RERR
+   OUTPUT = WERR
+END ELSE
+   OUTPUT = BODY
+END
+
+PRINT OUTPUT
+CALL WSETHEADER ("Access-Control-Allow-Origin","*")
+CALL WSEND (OUTPUT) 
+*
+END

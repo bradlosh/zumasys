@@ -5,8 +5,7 @@ const baseUrl = "http://127.0.0.1:20002/api";
 const List = {
     template: '#list-template',
     data: () => ({
-        apis: [],
-        search: ""
+        apis: []
     }),
     mounted() {
         this.getAPIs();
@@ -30,10 +29,10 @@ const API = {
         api: null
     }),
     mounted() {
-        this.getAPIs();
+        this.getAPI();
     },
     methods: {
-        getAPIs() {
+        getAPI() {
             var id = this.$route.params.id;
             axios.get(baseUrl + `/crudrtne/` + id).then(response => {
                 this.api = response.data[0]
@@ -63,5 +62,6 @@ var router = new VueRouter({
 });
 
     // Create vue instance with our router, and mount onto #app
+Vue.use(VueMaterial.default)
 var vue = new Vue({router});
 var app = vue.$mount('#app');

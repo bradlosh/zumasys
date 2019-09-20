@@ -1,0 +1,93 @@
+<html>
+    <head>
+        <title>Demo API Reader</title>
+        <meta charset="utf-8">
+        <meta content="width=device-width,initial-scale=1,minimal-ui" name="viewport">
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700,400italic|Material+Icons">
+        <link rel="stylesheet" href="https://unpkg.com/vue-material/dist/vue-material.min.css">
+        <link rel="stylesheet" href="https://unpkg.com/vue-material/dist/theme/default.css">
+    </head>
+    <body>
+        <div id="app">
+            <router-view />
+        </div>
+            <template id="list-template">
+                <div>
+					<md-list>
+                        <md-subheader>WDB.RESOURCE APIs</md-subheader>
+
+						<md-list-item v-for="api in apis">
+                            <router-link :to="{ name: 'api', params: { id: api.id }}">
+                                {{api.id}}
+                            </router-link>
+                        </md-list-item>
+                    </md-list>
+                    <md-button class="md-fab md-primary">
+                            <md-icon>add</md-icon>
+                    </md-button>
+                </div>
+            </template>
+        <template id="api-template">
+            <div>
+                    <md-subheader>WDB.RESOURCE APIs</md-subheader>
+
+                    <md-menu >
+                            <md-button md-menu-trigger>
+                                <router-link :to="{ name: 'homepage' }">API List</router-link>
+                            </md-button>
+                    </md-menu>
+                <div>
+                        <form novalidate class="md-layout" @submit.prevent="validateUser">
+                                <md-card class="md-layout-item md-size-50 md-small-size-100">
+                                  <md-card-header>
+                                    <div class="md-title">{{ api.id }}</div>
+                                  </md-card-header>
+                          
+                                  <md-card-content>
+                                    <div class="md-layout md-gutter">
+                                      <div class="md-layout-item md-small-size-100">
+                                        <md-field>
+                                          <label for="resource-type">Resource Type</label>
+                                          <md-input name="resource-type" id="resource-type" v-model="api.A1" :disabled="sending" />
+                                        </md-field>
+                                        <md-field>
+                                            <label for="description">Description</label>
+                                            <md-input name="description" id="description" v-model="api.A2" :disabled="sending" />
+                                        </md-field>
+                                        <md-field>
+                                            <label for="program">Program</label>
+                                            <md-input name="program" id="program" v-model="api.A3" :disabled="sending" />
+                                        </md-field>
+                                        <md-field>
+                                            <label for="reserved">Reserved</label>
+                                            <md-input name="reserved" id="reserved" v-model="api.A4" :disabled="sending" />
+                                        </md-field>
+                                       <md-field>
+                                            <label for="parse-cgi">Parse CGI</label>
+                                           <md-input name="parse-cgi" id="parse-cgi" v-model="api.A5" :disabled="sending" />
+                                      </md-field>
+                                        <md-field>
+                                         <label for="enabled">Enabled</label>
+                                       <md-input name="enabled" id="enabled" v-model="api.A6" :disabled="sending" />
+                                     </md-field>
+                                      <!-- <label for="debug">Debug</label>
+                                           <md-input name="debug" id="debug" v-model="api.A7" :disabled="sending" /> -->
+                                           <div class="input">
+                                           <md-checkbox v-model="api.A7" true-value="1" false-value="">Debug</md-checkbox>
+                                           </div>
+                                                                                                                                      </div>
+                          
+                </md-card-content>
+                </md-card>
+                </form>
+                </div>
+            </div>
+        </template>
+        <script src="https://unpkg.com/vue"></script>
+        <script src="https://unpkg.com/vue-material"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/vue-router/2.5.3/vue-router.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.16.1/axios.js"></script>
+  
+        <script src="app.js"></script>
+    </body>
+</html>
