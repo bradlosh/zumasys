@@ -40,39 +40,24 @@
             <div>
             <form novalidate class="md-layout" @submit.prevent="validateUser">
                 <md-card class="md-layout-item md-size-50 md-small-size-100">
-                    <md-card-header>
-                        <div class="md-title">{{ api.id }}</div>
-                    </md-card-header>
                           
                     <md-card-content>
                         <div class="md-layout md-gutter">
                             <div class="md-layout-item md-small-size-100">
                                 <md-field>
-                                    <label for="resource-type">Resource Type</label>
-                                    <md-input name="resource-type" id="resource-type" v-model="api.A1" :disabled="sending" />
+                                    <label for="api-id">API ID</label>
+                                    <md-input name="api-id" id="api-id" v-model="api.id" :disabled="sending" />
                                 </md-field>
                                 <md-field>
                                     <label for="description">Description</label>
-                                    <md-input name="description" id="description" v-model="api.A2" :disabled="sending" />
+                                    <md-input name="description" id="description" v-model="api.desc" :disabled="sending" />
                                 </md-field>
                                 <md-field>
                                     <label for="program">Program</label>
-                                    <md-input name="program" id="program" v-model="api.A3" :disabled="sending" />
-                                </md-field>
-                                <md-field>
-                                    <label for="reserved">Reserved</label>
-                                    <md-input name="reserved" id="reserved" v-model="api.A4" :disabled="sending" />
-                                </md-field>
-                                <md-field>
-                                    <label for="parse-cgi">Parse CGI</label>
-                                    <md-input name="parse-cgi" id="parse-cgi" v-model="api.A5" :disabled="sending" />
-                                </md-field>
-                                <md-field>
-                                    <label for="enabled">Enabled</label>
-                                    <md-input name="enabled" id="enabled" v-model="api.A6" :disabled="sending" />
+                                    <md-input name="program" id="program" v-model="api.program" :disabled="sending" />
                                 </md-field>
                                 <div class="input">
-                                    <md-checkbox v-model="api.A7" true-value="1" false-value="">Debug</md-checkbox>
+                                    <md-checkbox v-model="api.debug" true-value="1" false-value="">Debug</md-checkbox>
                                 </div>
                                                                                                                                       
                             </div> 

@@ -16,12 +16,12 @@ BEGIN CASE
             WIDS = \{\
             WIDS = WIDS: \ "id" : "\:WID:\",\
             WIDS = WIDS: \ "A1" : "\:WREC<1>:\",\
-            WIDS = WIDS: \ "A2" : "\:WREC<2>:\",\
-            WIDS = WIDS: \ "A3" : "\:WREC<3>:\",\
+            WIDS = WIDS: \ "desc" : "\:WREC<2>:\",\
+            WIDS = WIDS: \ "program" : "\:WREC<3>:\",\
             WIDS = WIDS: \ "A4" : "\:WREC<4>:\",\
             WIDS = WIDS: \ "A5" : "\:WREC<5>:\",\
             WIDS = WIDS: \ "A6" : "\:WREC<6>:\",\
-            WIDS = WIDS: \ "A7" : "\:WREC<7>:\"}\
+            WIDS = WIDS: \ "debug" : "\:WREC<7>:\"}\
          END
       END ELSE
          WIDS = ""
