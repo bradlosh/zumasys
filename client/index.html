@@ -1,76 +1,161 @@
 <html>
     <head>
         <title>Demo API Reader</title>
-        <meta charset="utf-8">
-        <meta content="width=device-width,initial-scale=1,minimal-ui" name="viewport">
-        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700,400italic|Material+Icons">
-        <link rel="stylesheet" href="https://unpkg.com/vue-material/dist/vue-material.min.css">
-        <link rel="stylesheet" href="https://unpkg.com/vue-material/dist/theme/default.css">
+        <link href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900" rel="stylesheet">
+        <link href="https://cdn.jsdelivr.net/npm/@mdi/font@3.x/css/materialdesignicons.min.css" rel="stylesheet">
+        <link href="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.min.css" rel="stylesheet">
+        <link href="https://use.fontawesome.com/releases/v5.0.13/css/all.css" rel="stylesheet">
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, minimal-ui">
     </head>
     <body>
         <div id="app">
-            <router-view />
+            <v-app>
+                <v-app-bar 
+                app
+                clipped-left
+              >
+                <v-toolbar-title>WDB.RESOURCE APIs</v-toolbar-title>
+                <v-toolbar-items>
+                        <v-btn 
+                            text
+                            :to="{ name: 'homepage'}"
+                        >
+                        API List
+                        <v-icon>fas fa-list</v-icon>
+                        </v-btn>
+                </v-toolbar-items>
+              </v-app-bar>
+              <v-content>
+                <v-container fluid>
+                  <v-fade-transition mode="out-in">
+                    <router-view />
+                  </v-fade-transition>
+                </v-container>
+              </v-content>      
+            </v-app>
         </div>
+
         <template id="list-template">
             <div>
-                <md-subheader>WDB.RESOURCE APIs</md-subheader>
-				<md-list>
-					<md-list-item v-for="api in apis">
-                        <router-link :to="{ name: 'api', params: { id: api.id }}">
-                            {{api.id}}
-                        </router-link>
-                    </md-list-item>
-                </md-list>
+                <v-card
+                    class="mx-auto"
+                    max-width="400"
+                    tile
+                >
+                    <v-list-item 
+                        v-for="api in apis"
+                    >
+                        <v-list-item-content>
+                            <v-list-item-title>
+                                {{api.id}}
+                            </v-list-item-title>
+                        </v-list-item-content>
 
-                <md-button class="md-fab md-primary">
-                        <md-icon>add</md-icon>
-                </md-button>
+                        <v-list-item-icon>
+                            <v-btn
+                                fab
+                                dark
+                                small
+                                color="green"
+                                :to="{ name: 'api', params: {id: api.id}}"
+                            >
+                                <v-icon>mdi-pencil</v-icon>
+                            </v-btn>
+                        </v-list-item-icon>
+                        <v-list-item-icon>
+                            <v-btn
+                                fab
+                                dark
+                                small
+                                color="red"
+                                @click="dAPI(api.id)"
+                            >
+                                <v-icon>mdi-delete</v-icon>
+                            </v-btn>
+                        </v-list-item-icon>
+                    </v-list-item>
+                    <v-btn
+                        fab
+                        dark
+                        small
+                        color="indigo"
+                        :to="{ name: 'napi'}"
+                    >
+                        <v-icon>mdi-plus</v-icon>
+                    </v-btn>
+                </v-card>
             </div>
         </template>
 
         <template id="api-template">
             <div>
-                <md-subheader>WDB.RESOURCE APIs</md-subheader>
-
-                <md-menu >
-                    <md-button md-menu-trigger>
-                        <router-link :to="{ name: 'homepage' }">API List</router-link>
-                    </md-button>
-                </md-menu>
-            <div>
-            <form novalidate class="md-layout" @submit.prevent="validateUser">
-                <md-card class="md-layout-item md-size-50 md-small-size-100">
-                          
-                    <md-card-content>
-                        <div class="md-layout md-gutter">
-                            <div class="md-layout-item md-small-size-100">
-                                <md-field>
-                                    <label for="api-id">API ID</label>
-                                    <md-input name="api-id" id="api-id" v-model="api.id" :disabled="sending" />
-                                </md-field>
-                                <md-field>
-                                    <label for="description">Description</label>
-                                    <md-input name="description" id="description" v-model="api.desc" :disabled="sending" />
-                                </md-field>
-                                <md-field>
-                                    <label for="program">Program</label>
-                                    <md-input name="program" id="program" v-model="api.program" :disabled="sending" />
-                                </md-field>
-                                <div class="input">
-                                    <md-checkbox v-model="api.debug" true-value="1" false-value="">Debug</md-checkbox>
-                                </div>
-                                                                                                                                      
-                            </div> 
-                        </div>
-                    </md-card-content>
-                </md-card>
-            </form>
+                <v-card
+                class="mx-auto"
+                max-width="400"
+                tile
+                >
+                
+                    <v-form 
+                    ref="form"
+                    v-model="valid"
+                    lazy-validation
+                    >
+                        <v-text-field
+                            label="API ID"
+                            id="api-id"
+                            v-model="api.id"
+                        ></v-text-field>
+                        <v-text-field
+                            label="Description"
+                            id="description"
+                            v-model="api.desc"
+                        ></v-text-field>
+                        <v-text-field
+                            label="Program"
+                            id="program"  
+                            v-model="api.program"
+                        ></v-text-field>
+                        <v-checkbox
+                            v-model="api.debug"
+                            true-value="1"
+                            :label="`Debug`"
+                        ></v-checkbox>                                                                                                      
+                    </v-form>
+                    <v-btn
+                        fab
+                        dark
+                        small
+                        color="green"
+                        @click="uAPI(api.id)"
+                    >
+                        <v-icon>mdi-check</v-icon>
+                    </v-btn>
+                    <v-btn
+                        fab
+                        dark
+                        small
+                        color="red"
+                        @click="dAPI(api.id)"
+                    >
+                        <v-icon>mdi-delete</v-icon>
+                    </v-btn>
+                    <v-btn
+                        fab
+                        dark
+                        small
+                        color="purple"
+                        :to="{ name: 'homepage'}"
+                    >
+                        <v-icon>mdi-undo</v-icon>
+                    </v-btn>
+                </v-card>
+            </div>
         </template>
-        <script src="https://unpkg.com/vue"></script>
-        <script src="https://unpkg.com/vue-material"></script>
+
+        <script src="https://cdn.jsdelivr.net/npm/vue@2.x/dist/vue.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/vue-router/2.5.3/vue-router.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.16.1/axios.js"></script>
-  
         <script src="app.js"></script>
     </body>
 </html>

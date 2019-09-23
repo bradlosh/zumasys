@@ -1,3 +1,4 @@
+Vue.use(VueRouter)
 // base Url of the API
 const baseUrl = "http://127.0.0.1:20002/api";
 
@@ -44,8 +45,46 @@ const API = {
     }
 };
 
+const nAPI = {
+    template: '#api-template',
+    data: () => ({
+        api: null
+    }),
+    mounted() {
+        this.getAPI();
+    },
+    methods: {
+        getAPI() {
+            this.api = ''
+        }
+    }
+
+}
+
+const dAPI = {
+    template: '#api-template',
+    data: () => ({
+        api: null
+    }),
+    mounted() {
+        this.delAPI();
+    },
+    methods: {
+        delAPI() {
+            var id = this.$route.params.id;
+            axios.get(baseUrl + `/crudrtne/` + id).then(response => {
+                this.api = response.data[0]
+                console.log(this.api);
+            }).catch(error => {
+                console.log(error);
+            })
+        }
+    }
+
+}
+
     // Create vue router
-var router = new VueRouter({
+let router = new VueRouter({
     mode: 'history',
     routes: [
         {
@@ -57,11 +96,22 @@ var router = new VueRouter({
             name: 'api',
             path: '/:id',
             component: API
+        },
+        {
+            name: 'napi',
+            path: 'new',
+            component: nAPI
+        },
+        { 
+            path: '*', 
+            redirect: '/' 
         }
     ]
 });
 
     // Create vue instance with our router, and mount onto #app
-Vue.use(VueMaterial.default)
-var vue = new Vue({router});
-var app = vue.$mount('#app');
+new Vue({
+    el: '#app',
+    router,
+    vuetify: new Vuetify()
+})
