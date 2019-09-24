@@ -3,7 +3,8 @@
 ******
 *
 WERR = "" ; BODY = "" ; RERR = ""
-OPEN "WDB.RESOURCE" TO F.WORK ELSE WERR = "CANNOT OPEN FILE"
+OPEN "WDB.RESOURCE" TO F.WORK ELSE WERR = "CANNOT OPEN WDB.RESOURCE"
+OPEN "bin"          TO F.BIN  ELSE WERR = "CANNOT OPEN bin"
 *
 CALL WGETHEADER(REQUESTMETHOD,"REQUEST_METHOD")
 CALL WGETPARAM(WID,"1")
@@ -25,7 +26,7 @@ BEGIN CASE
          END
       END ELSE
          WIDS = ""
-         SELECT F.WORK
+         SSELECT F.WORK
          JSONOBJ = ""; OBJ = ""
          EOF = 0
          LOOP         
@@ -47,20 +48,26 @@ BEGIN CASE
       CALL WOBJ(OBJ,"GET","desc",DESC,"",RERR)
       CALL WOBJ(OBJ,"GET","program",PGM,"",RERR)
       CALL WOBJ(OBJ,"GET","debug",DEBUG,"",RERR)
+      IF DEBUG = "true" THEN DEBUG = 1 ELSE DEBUG = ""
+      WID = CHANGE(WID," ","_")
       READ WREC FROM F.WORK,"API*":WID THEN
-         WERR = "Cannot create ":WID:", it already exists"
+         WERR = \{ "msg": "Cannot create \:WID:\, it already exists" }\
       END ELSE
-         WREC = ""
-         WREC<1> = "P"
-         WREC<2> = DESC
-         WREC<3> = PGM
-         WREC<4> = ""
-         WREC<5> = 1
-         WREC<6> = 1
-         WREC<7> = DEBUG
-         WRITE WREC ON F.WORK,"API*":WID
-         SUCCESS = WID:" has been added to WDB.RESOURCE"
-         BODY = SUCCESS
+         READ PCHECK FROM F.BIN,PGM THEN
+            WREC = ""
+            WREC<1> = "P"
+            WREC<2> = DESC
+            WREC<3> = PGM
+            WREC<4> = ""
+            WREC<5> = 1
+            WREC<6> = 1
+            WREC<7> = DEBUG
+            WRITE WREC ON F.WORK,"API*":WID
+            MESSAGE = WID:\ has been added to WDB.RESOURCE\
+         END ELSE
+            MESSAGE = PGM:" is not a valid program, please correct"
+         END
+         BODY = \{ "msg": "\:MESSAGE:\"}\
       END
 
    CASE REQUESTMETHOD EQ "PUT"
@@ -71,28 +78,37 @@ BEGIN CASE
       CALL WOBJ(OBJ,"GET","desc",DESC,"",RERR)
       CALL WOBJ(OBJ,"GET","program",PGM,"",RERR)
       CALL WOBJ(OBJ,"GET","debug",DEBUG,"",RERR)
+      IF DEBUG = "true" THEN DEBUG = 1 ELSE DEBUG = ""
       READ WREC FROM F.WORK,"API*":WID THEN
-         WREC<2> = DESC
-         WREC<3> = PGM
-         WREC<7> = DEBUG
-         WRITE WREC ON F.WORK,"API*":WID
-         SUCCESS = WID:" has been updated!" 
-         BODY = SUCCESS
+         READ PCHECK FROM F.BIN,PGM THEN
+            WREC<2> = DESC
+            WREC<3> = PGM
+            WREC<7> = DEBUG
+            WRITE WREC ON F.WORK,"API*":WID
+            MESSAGE = WID:\ has been updated!\
+         END ELSE
+            MESSAGE = PGM:" is not a valid program, please correct"
+         END
       END ELSE
-         WERR = WID:" does not exist"
+         MESSAGE = WID:\ does not exist\
       END
+      BODY = \{ "msg": "\:MESSAGE:\"}\
 
    CASE REQUESTMETHOD EQ "DELETE"
       *WERR = "DELETE Method"
-      CALL WGETBODY(BODY)
-      CALL WOBJ(OBJ,"FROMSTRING","",BODY,"",RERR)
-      CALL WOBJ(OBJ,"GET","id",WID,"",RERR)
-      DELETE F.WORK,"API*":WID
-      SUCCESS = WID:" has been DELETED"
-      BODY = SUCCESS
+      IF WID # "" THEN
+         DELETE F.WORK,"API*":WID
+         MESSAGE = WID:\ has been DELETED\
+      END ELSE
+         MESSAGE = WID:\ cannot be deleted at this time\
+      END
+      BODY = \{ "msg": "\:MESSAGE:\"}\
+
+   CASE REQUESTMETHOD EQ "OPTIONS"
+      CALL WSETHEADER ("Access-Control-Allow-Headers","X-Requested-With, accept, content-type")
 
    CASE 1
-      WERR = "Error in your call"
+      WERR = \{ "msg": "Error in your call" }\
 
 END CASE
 *
@@ -105,6 +121,8 @@ END
 
 PRINT OUTPUT
 CALL WSETHEADER ("Access-Control-Allow-Origin","*")
+CALL WSETHEADER ("Access-Control-Allow-Methods","PUT, DELETE, POST, GET")
+CALL WSETCONTENTTYPE("application/json") 
 CALL WSEND (OUTPUT) 
 *
 END

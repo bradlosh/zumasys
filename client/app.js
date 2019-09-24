@@ -19,11 +19,24 @@ const List = {
             }).catch(error => {
                 console.log(error);
             })
+        },
+        dAPI(id){
+            axios({
+                method: 'delete',
+                url: baseUrl + '/crudrtne/' + id
+            }).then(response =>{
+                this.api = response.data.msg;
+                console.log(this.api);
+                alert(this.api);
+                location.reload();
+            }).catch(error => {
+                console.log(error);
+            })
         }
     }
 };
 
-// Post component
+// get component
 const API = {
     template: '#api-template',
     data: () => ({
@@ -41,47 +54,42 @@ const API = {
             }).catch(error => {
                 console.log(error);
             })
-        }
-    }
-};
-
-const nAPI = {
-    template: '#api-template',
-    data: () => ({
-        api: null
-    }),
-    mounted() {
-        this.getAPI();
-    },
-    methods: {
-        getAPI() {
-            this.api = ''
-        }
-    }
-
-}
-
-const dAPI = {
-    template: '#api-template',
-    data: () => ({
-        api: null
-    }),
-    mounted() {
-        this.delAPI();
-    },
-    methods: {
-        delAPI() {
-            var id = this.$route.params.id;
-            axios.get(baseUrl + `/crudrtne/` + id).then(response => {
-                this.api = response.data[0]
+        },
+        uAPI(apiform,newflg) {
+            if (!newflg){httpmethod="post";}else{httpmethod="put";}
+            axios({
+                method: httpmethod,
+                url: baseUrl + `/crudrtne/` + apiid,
+                data: {id: apiform.apiid.value,
+                    desc: apiform.description.value,
+                    program: apiform.program.value,
+                    debug: apiform.debug.checked
+                },
+                config: {headers: {"Content-Type": "application/json"}}
+            }).then(response => {
+                this.api = response.data.msg;
+                alert(this.api);
                 console.log(this.api);
+                this.$router.push('/');
+            }).catch(error => {
+                console.log(error);
+            })
+        },
+        dAPI(id){
+            axios({
+                method: 'delete',
+                url: baseUrl + '/crudrtne/' + id
+            }).then(response =>{
+                this.api = response.data.msg;
+                console.log(this.api);
+                alert(this.api);
+                this.$router.push('/');
             }).catch(error => {
                 console.log(error);
             })
         }
     }
-
-}
+};
 
     // Create vue router
 let router = new VueRouter({
@@ -99,8 +107,8 @@ let router = new VueRouter({
         },
         {
             name: 'napi',
-            path: 'new',
-            component: nAPI
+            path: '/new',
+            component: API
         },
         { 
             path: '*', 
