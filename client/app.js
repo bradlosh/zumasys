@@ -60,9 +60,10 @@ const API = {
             axios({
                 method: httpmethod,
                 url: baseUrl + `/crudrtne/` + apiid,
-                data: {id: apiform.apiid.value,
+                data: {
+                    id: apiform.apiid.value.toUpperCase(),
                     desc: apiform.description.value,
-                    program: apiform.program.value,
+                    program: apiform.program.value.toUpperCase(),
                     debug: apiform.debug.checked
                 },
                 config: {headers: {"Content-Type": "application/json"}}
