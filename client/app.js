@@ -14,8 +14,12 @@ const List = {
     methods: {
         getAPIs() {
             axios.get(baseUrl + `/crudrtne/`).then(response => {
-                this.apis = response.data;
-                console.log(this.apis);
+                if(response.data.status=="ok"){
+                    this.apis = response.data.results;
+                    console.log(this.apis);
+                }else{
+                    alert(response.data.statusmsg);
+                }
             }).catch(error => {
                 console.log(error);
             })
@@ -25,10 +29,10 @@ const List = {
                 method: 'delete',
                 url: baseUrl + '/crudrtne/' + id
             }).then(response =>{
-                this.api = response.data.msg;
-                console.log(this.api);
-                alert(this.api);
-                location.reload();
+                    this.api = response.data.statusmsg;
+                    console.log(this.api);
+                    alert(this.api);
+                    location.reload();
             }).catch(error => {
                 console.log(error);
             })
@@ -40,7 +44,7 @@ const List = {
 const API = {
     template: '#api-template',
     data: () => ({
-        api: null
+        api: ""
     }),
     mounted() {
         this.getAPI();
@@ -48,18 +52,24 @@ const API = {
     methods: {
         getAPI() {
             var id = this.$route.params.id;
+            if (id) {
             axios.get(baseUrl + `/crudrtne/` + id).then(response => {
-                this.api = response.data[0]
-                console.log(this.api);
+                if(response.data.status=="ok"){
+                    this.api = response.data.results[0];
+                    console.log(this.api);
+                }else{
+                    alert(response.data.statusmsg);
+                }
             }).catch(error => {
                 console.log(error);
             })
+        }
         },
         uAPI(apiform,newflg) {
             if (!newflg){httpmethod="post";}else{httpmethod="put";}
             axios({
                 method: httpmethod,
-                url: baseUrl + `/crudrtne/` + apiid,
+                url: baseUrl + `/crudrtne/`,
                 data: {
                     id: apiform.apiid.value.toUpperCase(),
                     desc: apiform.description.value,
@@ -68,7 +78,7 @@ const API = {
                 },
                 config: {headers: {"Content-Type": "application/json"}}
             }).then(response => {
-                this.api = response.data.msg;
+                this.api = response.data.statusmsg;
                 alert(this.api);
                 console.log(this.api);
                 this.$router.push('/');
@@ -81,7 +91,7 @@ const API = {
                 method: 'delete',
                 url: baseUrl + '/crudrtne/' + id
             }).then(response =>{
-                this.api = response.data.msg;
+                this.api = response.data.statusmsg;
                 console.log(this.api);
                 alert(this.api);
                 this.$router.push('/');

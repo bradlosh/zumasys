@@ -1,5 +1,8 @@
-<html>
+<!DOCTYPE html>
+<html lang="en">
     <head>
+        <meta content="text/html;charset=utf-8" http-equiv="Content-Type">
+        <meta content="utf-8" http-equiv="encoding">
         <title>Demo API Reader</title>
         <link href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900" rel="stylesheet">
         <link href="https://cdn.jsdelivr.net/npm/@mdi/font@3.x/css/materialdesignicons.min.css" rel="stylesheet">
@@ -99,9 +102,6 @@
                     ref="form"
                     id="apiform"
                     name="apiform"
-                    v-model="valid"
-                    v-on:submit.prevent="onSubmit"
-                    lazy-validation
                     >
                         <v-text-field
                             label="API ID"
@@ -110,6 +110,7 @@
                             v-model="api.id"
                             required
                             v-bind:readonly="api.id!=null"
+                            lazy
                         ></v-text-field>
                         <v-text-field
                             label="Description"
@@ -117,6 +118,7 @@
                             name="description"
                             v-model="api.desc"
                             required
+                            lazy
                         ></v-text-field>
                         <v-text-field
                             label="Program"
@@ -124,6 +126,7 @@
                             name="program"
                             v-model="api.program"
                             required
+                            lazy
                         ></v-text-field>
                         <v-checkbox
                             v-model="api.debug"

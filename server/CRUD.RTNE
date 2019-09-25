@@ -2,46 +2,87 @@
 * WRAPPER FOR DEMO ROUTINE TO WORK WITH WDB.RESOURCE
 ******
 *
+CALL WOBJ(RESPONSE.OBJ,"FROMSTRING","","{}","",RERR)
+JSON.STATUS = "ok"
+JSON.STATUS.MESSAGE = ""
+*
 WERR = "" ; BODY = "" ; RERR = ""
-OPEN "WDB.RESOURCE" TO F.WORK ELSE WERR = "CANNOT OPEN WDB.RESOURCE"
-OPEN "bin"          TO F.BIN  ELSE WERR = "CANNOT OPEN bin"
+OPEN "WDB.RESOURCE" TO F.WORK ELSE 
+   JSON.STATUS = "error"
+   JSON.STATUS.MESSAGE = "cannot open WDB.RESOURCE"
+   GOTO END.PROGRAM
+END
+OPEN "bin" TO F.BIN ELSE 
+   JSON.STATUS = "error"
+   JSON.STATUS.MESSAGE= "cannot open bin"
+   GOTO END.PROGRAM
+END
 *
 CALL WGETHEADER(REQUESTMETHOD,"REQUEST_METHOD")
 CALL WGETPARAM(WID,"1")
-IF REQUESTMETHOD = "" THEN REQUESTMETHOD = "VIEW"
+IF REQUESTMETHOD = "" THEN REQUESTMETHOD = "GET"
+CALL WOBJ(RESPONSE.OBJ,"SET.ARRAY","results","","",RERR)
 *
 BEGIN CASE
    CASE REQUESTMETHOD EQ "GET"
+      GOSUB GET.RECORDS
+   CASE REQUESTMETHOD EQ "POST"
+      GOSUB POST.RECORD
+   CASE REQUESTMETHOD EQ "PUT"
+      GOSUB PUT.RECORD
+   CASE REQUESTMETHOD EQ "DELETE"
+      GOSUB DELETE.RECORD
+   CASE REQUESTMETHOD EQ "OPTIONS"
+      CALL WSETHEADER ("Access-Control-Allow-Headers","X-Requested-With, accept, content-type")
+      JSON.STATUS = "ok"
+      JSON.STATUS.MESSAGE = ""
+   CASE 1
+      JSON.STATUS = "error"
+      JSON.STATUS.MESSAGE = "invalid request method = ":REQUESTMETHOD
+END CASE
+*
+END.PROGRAM:*
+CALL WSETHEADER ("Access-Control-Allow-Origin","*")
+CALL WSETHEADER ("Access-Control-Allow-Methods","PUT, DELETE, POST, GET")
+CALL WSETCONTENTTYPE("application/json") 
+CALL WOBJ(RESPONSE.OBJ,"SET.STRING","status",JSON.STATUS,"",RERR)
+CALL WOBJ(RESPONSE.OBJ,"SET.STRING","statusmsg",JSON.STATUS.MESSAGE,"",RERR)
+CALL WOBJ(RESPONSE.OBJ,"TOSTRING","",RESPONSE.JSON,"",RERR)
+CALL WSEND(RESPONSE.JSON) 
+STOP
+*
+GET.RECORDS:*
       IF WID NE "" THEN
          READ WREC FROM F.WORK,"API*":WID THEN
-            WIDS = \{\
-            WIDS = WIDS: \ "id" : "\:WID:\",\
-            WIDS = WIDS: \ "A1" : "\:WREC<1>:\",\
-            WIDS = WIDS: \ "desc" : "\:WREC<2>:\",\
-            WIDS = WIDS: \ "program" : "\:WREC<3>:\",\
-            WIDS = WIDS: \ "A4" : "\:WREC<4>:\",\
-            WIDS = WIDS: \ "A5" : "\:WREC<5>:\",\
-            WIDS = WIDS: \ "A6" : "\:WREC<6>:\",\
-            WIDS = WIDS: \ "debug" : "\:WREC<7>:\"}\
+            CALL WOBJ(RESPONSE.OBJ,"SET.OBJECT","results[0]","","",RERR)
+            CALL WOBJ(RESPONSE.OBJ,"SET.STRING","results[0].id",WID,"",RERR)
+            CALL WOBJ(RESPONSE.OBJ,"SET.STRING","results[0].A1",WREC<1>,"",RERR)
+            CALL WOBJ(RESPONSE.OBJ,"SET.STRING","results[0].desc",WREC<2>,"",RERR)
+            CALL WOBJ(RESPONSE.OBJ,"SET.STRING","results[0].program",WREC<3>,"",RERR)
+            CALL WOBJ(RESPONSE.OBJ,"SET.STRING","results[0].A4",WREC<4>,"",RERR)
+            CALL WOBJ(RESPONSE.OBJ,"SET.STRING","results[0].A5",WREC<5>,"",RERR)
+            CALL WOBJ(RESPONSE.OBJ,"SET.STRING","results[0].A6",WREC<6>,"",RERR)
+            CALL WOBJ(RESPONSE.OBJ,"SET.STRING","results[0].debug",WREC<7>,"",RERR)
+         END ELSE
+            JSON.STATUS = "error"
+            JSON.STATUS.MESSAGE = "could not find ":WID
          END
       END ELSE
-         WIDS = ""
+         RCNT = 0
          SSELECT F.WORK
-         JSONOBJ = ""; OBJ = ""
-         EOF = 0
          LOOP         
-            READNEXT WID ELSE EOF = 1
-         UNTIL EOF DO            
-            IF WID[1,3] = "API" THEN             
-               WIDS<-1> = \{"id":"\:FIELD(WID,"*",2):\"}\
+            READNEXT WID ELSE EXIT
+            IF WID[1,3] = "API" THEN
+               RES = "results[":RCNT:"]"             
+               CALL WOBJ(RESPONSE.OBJ,"SET.OBJECT",RES,"","",RERR)
+               CALL WOBJ(RESPONSE.OBJ,"SET.STRING",RES:".id",FIELD(WID,"*",2),"",RERR)
+               RCNT+=1
             END
          REPEAT
-         WIDS = CHANGE(WIDS,@AM,\,\)
       END
-      BODY = \ [\: WIDS :\] \
-
-   CASE REQUESTMETHOD EQ "POST"
-      *WERR = "POST or Create Method"
+      RETURN
+*
+POST.RECORD:*
       CALL WGETBODY(BODY)
       CALL WOBJ(OBJ,"FROMSTRING","",BODY,"",RERR)
       CALL WOBJ(OBJ,"GET","id",WID,"",RERR)
@@ -51,7 +92,8 @@ BEGIN CASE
       IF DEBUG = "true" THEN DEBUG = 1 ELSE DEBUG = ""
       WID = CHANGE(WID," ","_")
       READ WREC FROM F.WORK,"API*":WID THEN
-         WERR = \{ "msg": "Cannot create \:WID:\, it already exists" }\
+         JSON.STATUS = "error"
+         JSON.STATUS.MESSAGE = "Cannot create :WID:, it already exists"
       END ELSE
          READ PCHECK FROM F.BIN,PGM THEN
             WREC = ""
@@ -63,15 +105,16 @@ BEGIN CASE
             WREC<6> = 1
             WREC<7> = DEBUG
             WRITE WREC ON F.WORK,"API*":WID
-            MESSAGE = WID:\ has been added to WDB.RESOURCE\
+            JSON.STATUS = "ok"
+            JSON.STATUS.MESSAGE = WID:\ has been added to WDB.RESOURCE\
          END ELSE
-            MESSAGE = PGM:" is not a valid program, please correct"
+            JSON.STATUS = "error"
+            JSON.STATUS.MESSAGE = PGM:" is not a valid program, please correct"
          END
-         BODY = \{ "msg": "\:MESSAGE:\"}\
       END
-
-   CASE REQUESTMETHOD EQ "PUT"
-      *WERR = "PUT or Update Method"
+      RETURN
+*
+PUT.RECORD:*
       CALL WGETBODY(BODY)
       CALL WOBJ(OBJ,"FROMSTRING","",BODY,"",RERR)
       CALL WOBJ(OBJ,"GET","id",WID,"",RERR)
@@ -85,44 +128,26 @@ BEGIN CASE
             WREC<3> = PGM
             WREC<7> = DEBUG
             WRITE WREC ON F.WORK,"API*":WID
-            MESSAGE = WID:\ has been updated!\
+            JSON.STATUS = "ok"
+            JSON.STATUS.MESSAGE = WID:" has been updated!"
          END ELSE
-            MESSAGE = PGM:" is not a valid program, please correct"
+            JSON.STATUS = "error"
+            JSON.STATUS.MESSAGE = PGM:" is not a valid program, please correct"
          END
       END ELSE
-         MESSAGE = WID:\ does not exist\
+            JSON.STATUS = "error"
+            JSON.STATUS.MESSAGE = WID:\ does not exist\
       END
-      BODY = \{ "msg": "\:MESSAGE:\"}\
-
-   CASE REQUESTMETHOD EQ "DELETE"
-      *WERR = "DELETE Method"
+      RETURN
+*
+DELETE.RECORD:*
       IF WID # "" THEN
          DELETE F.WORK,"API*":WID
-         MESSAGE = WID:\ has been DELETED\
+         JSON.STATUS = "ok"
+         JSON.STATUS.MESSAGE = WID:" has been DELETED"
       END ELSE
-         MESSAGE = WID:\ cannot be deleted at this time\
+         JSON.STATUS = "error"
+         JSON.STATUS.MESSAGE = WID:" cannot be deleted at this time"
       END
-      BODY = \{ "msg": "\:MESSAGE:\"}\
-
-   CASE REQUESTMETHOD EQ "OPTIONS"
-      CALL WSETHEADER ("Access-Control-Allow-Headers","X-Requested-With, accept, content-type")
-
-   CASE 1
-      WERR = \{ "msg": "Error in your call" }\
-
-END CASE
+      RETURN
 *
-IF WERR NE "" OR RERR NE "" THEN
-   IF RERR NE "" THEN WERR = RERR
-   OUTPUT = WERR
-END ELSE
-   OUTPUT = BODY
-END
-
-PRINT OUTPUT
-CALL WSETHEADER ("Access-Control-Allow-Origin","*")
-CALL WSETHEADER ("Access-Control-Allow-Methods","PUT, DELETE, POST, GET")
-CALL WSETCONTENTTYPE("application/json") 
-CALL WSEND (OUTPUT) 
-*
-END
