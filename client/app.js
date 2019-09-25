@@ -81,12 +81,13 @@ const API = {
                 this.api = response.data.statusmsg;
                 alert(this.api);
                 console.log(this.api);
-                this.$router.push('/');
             }).catch(error => {
                 console.log(error);
             })
+            this.$router.push('/');
         },
         dAPI(id){
+            if (id){
             axios({
                 method: 'delete',
                 url: baseUrl + '/crudrtne/' + id
@@ -94,10 +95,11 @@ const API = {
                 this.api = response.data.statusmsg;
                 console.log(this.api);
                 alert(this.api);
-                this.$router.push('/');
             }).catch(error => {
                 console.log(error);
             })
+            }
+            this.$router.push('/');
         }
     }
 };
