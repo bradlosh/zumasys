@@ -1,15 +1,15 @@
 <template>
-  <APIList />
+  <APIEdit />
 </template>
 
 <script lang="ts">
 import Vue from 'vue';
-import APIList from '../components/APIList.vue';
+import APIEdit from '../components/APIEdit.vue';
 
 export default ({
-  name: 'Home',
+  name: 'APIE',
   components: {
-    APIList
+    APIEdit
   },
 });
 </script>
