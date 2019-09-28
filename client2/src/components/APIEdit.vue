@@ -77,7 +77,7 @@ import Vue from 'vue';
 const baseUrl = "http://127.0.0.1:20002/api/crudrtne/";
 const api;
 
-export default ({
+export default Vue.extend({
     name: 'APIEdit',
     data() {
         return{
@@ -89,7 +89,6 @@ export default ({
     },
     methods: {
         getAPI() {
-            console.log('editvue');
             var id = this.$route.params.id;
             if (id) {
             axios.get(baseUrl + id).then(response => {

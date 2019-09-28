@@ -24,7 +24,7 @@
 import Vue from 'vue';
 //import APIList from './components/APIList.vue';
 
-export default ({
+export default Vue.extend({
   name: 'App',
 //  components: {
 //    APIList,

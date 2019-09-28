@@ -59,7 +59,7 @@ import Vue from 'vue';
 
 const baseUrl = "http://127.0.0.1:20002/api/crudrtne/";
 
-export default ({
+export default Vue.extend({
     name: 'APIList',
     data() {
       return {

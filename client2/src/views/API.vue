@@ -6,7 +6,7 @@
 import Vue from 'vue';
 import APIEdit from '../components/APIEdit.vue';
 
-export default ({
+export default Vue.extend({
   name: 'APIE',
   components: {
     APIEdit
