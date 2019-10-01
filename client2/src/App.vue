@@ -15,22 +15,21 @@
     </v-app-bar>
 
     <v-content>
-      <router-view></router-view>
+      <router-view :key="$route.fullPath"></router-view>
     </v-content>
   </v-app>
 </template>
 
 <script lang="ts">
 import Vue from 'vue';
-//import APIList from './components/APIList.vue';
+import Home from './views/Home.vue';
+import APIE from './views/API.vue';
 
 export default Vue.extend({
   name: 'App',
-//  components: {
-//    APIList,
-//  },
-//  data: () => ({
-//    //
-//  }),
+  components: {
+    Home,
+    APIE
+  },
 });
 </script>

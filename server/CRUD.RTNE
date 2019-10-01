@@ -89,11 +89,10 @@ POST.RECORD:*
       CALL WOBJ(OBJ,"GET","desc",DESC,"",RERR)
       CALL WOBJ(OBJ,"GET","program",PGM,"",RERR)
       CALL WOBJ(OBJ,"GET","debug",DEBUG,"",RERR)
-      IF DEBUG = "true" THEN DEBUG = 1 ELSE DEBUG = ""
       WID = CHANGE(WID," ","_")
       READ WREC FROM F.WORK,"API*":WID THEN
          JSON.STATUS = "error"
-         JSON.STATUS.MESSAGE = "Cannot create :WID:, it already exists"
+         JSON.STATUS.MESSAGE = "Cannot create ":WID:", it already exists"
       END ELSE
          READ PCHECK FROM F.BIN,PGM THEN
             WREC = ""
@@ -106,7 +105,7 @@ POST.RECORD:*
             WREC<7> = DEBUG
             WRITE WREC ON F.WORK,"API*":WID
             JSON.STATUS = "ok"
-            JSON.STATUS.MESSAGE = WID:\ has been added to WDB.RESOURCE\
+            JSON.STATUS.MESSAGE = WID:" has been added to WDB.RESOURCE"
          END ELSE
             JSON.STATUS = "error"
             JSON.STATUS.MESSAGE = PGM:" is not a valid program, please correct"
@@ -121,7 +120,6 @@ PUT.RECORD:*
       CALL WOBJ(OBJ,"GET","desc",DESC,"",RERR)
       CALL WOBJ(OBJ,"GET","program",PGM,"",RERR)
       CALL WOBJ(OBJ,"GET","debug",DEBUG,"",RERR)
-      IF DEBUG = "true" THEN DEBUG = 1 ELSE DEBUG = ""
       READ WREC FROM F.WORK,"API*":WID THEN
          READ PCHECK FROM F.BIN,PGM THEN
             WREC<2> = DESC
@@ -136,7 +134,7 @@ PUT.RECORD:*
          END
       END ELSE
             JSON.STATUS = "error"
-            JSON.STATUS.MESSAGE = WID:\ does not exist\
+            JSON.STATUS.MESSAGE = WID:" does not exist"
       END
       RETURN
 *

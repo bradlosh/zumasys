@@ -16,12 +16,14 @@ export default new Router({
     { 
       name: 'api',
       path: '/:id',
-      component: APIE
+      component: APIE,
+      props: true,
     },
     {
       name: 'napi',
       path: '/new',
-      component: APIE
+      component: APIE,
+      props: true,
     },
     { path: '*', redirect: '/' },
   ],

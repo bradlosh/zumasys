@@ -63,11 +63,10 @@ export default Vue.extend({
     name: 'APIList',
     data() {
       return {
-        apis: [],
-        api: []
+        apis: []
       }
     },
-    mounted() {
+    mounted: function() {
         this.getAPIs();
     },
     methods: {
@@ -91,7 +90,7 @@ export default Vue.extend({
                     this.api = response.data.statusmsg;
                     console.log(this.api);
                     alert(this.api);
-                    this.$router.push('/');
+                    this.getAPIs();
             }).catch(error => {
                     console.log(error);
             })
